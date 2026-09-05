@@ -48,7 +48,7 @@ void GatewayClient::identify() {
 	nlohmann::json payload = {
 		{"op", 2},
 		{"d", {
-			{"token", "MTU0NTYyOTA0MjM5NTQ1MTM5NA.GmHyOw.-SDn8kFT3RP0vP3Bgdj8i_R9QqXikvpJwJ4NZY"},
+			{"token", ""}, // Whoopsies, add something to initalize the token don't leave it here again D-:
 			{"intents", 0},
 			{"properties", {
 				{"os", "client_os"},
