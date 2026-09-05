@@ -1,5 +1,4 @@
 ﻿cmake_minimum_required(VERSION 3.20)
-
 project(DiscordLuau
     VERSION 0.1.0
     LANGUAGES CXX
@@ -10,7 +9,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Dependencies
+find_package(unofficial-luau CONFIG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
+find_package(nlohmann_json REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 # Source files
@@ -34,4 +35,8 @@ target_link_libraries(Discord
         Boost::system
         OpenSSL::SSL
         OpenSSL::Crypto
+        nlohmann_json::nlohmann_json
+        unofficial::luau::Luau.VM
+        unofficial::luau::Luau.Compiler
+        unofficial::luau::Luau.Ast
 )
