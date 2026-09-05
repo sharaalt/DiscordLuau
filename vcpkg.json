@@ -1,0 +1,9 @@
+{
+  "name": "discord-luau",
+  "version-string": "0.1.0",
+  "dependencies": [
+    "boost-beast",
+    "openssl",
+    "nlohmann-json"
+  ]
+}

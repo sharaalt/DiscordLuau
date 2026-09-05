@@ -1,0 +1,36 @@
+# Dependencies
+vcpkg_installed/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.VC.db
+*.VC.VC.opendb
+
+# Build artifacts
+Debug/
+Release/
+x64/
+x86/
+*.obj
+*.pdb
+*.ilk
+*.exe
+*.dll
+*.lib
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+
+# CMake Build Files
+build/
+out/
+
+# OS
+.DS_Store
+Thumbs.db
