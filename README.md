@@ -14,10 +14,13 @@ Discord Luau is a translation of the Discord API into luau similar to projects s
 ### Back-end:
 #### Networking:
 - [x] Gateway Communication
-- [ ] More stuff soon! 
+- [ ] Expose networking functions to luau side
+- [x] EventDispatcher for C++
+   -  [ ] EventDispatcher integration for luau
 
 ### Front-end:
-- [ ] Add stuff here later :-p
+- [x] Basic bot connection
+- [ ] Embed Class
 
 ## Contributions:
 Feel free to contribute as much as you want however if you are making major changes please let me know and, I'll take a look at them before committing!
