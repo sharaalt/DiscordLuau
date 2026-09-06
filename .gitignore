@@ -8,6 +8,9 @@ vcpkg_installed/
 *.VC.db
 *.VC.VC.opendb
 
+# Secrets
+scripts/secrets.luau
+
 # Build artifacts
 Debug/
 Release/
