@@ -17,11 +17,39 @@ void WebSocketManager::connect(const std::string host, const std::string port, c
 }
 
 std::string WebSocketManager::receive() {
+	beast::error_code ec;
 	beast::flat_buffer buffer;
 
-	_websocket.read(buffer);
+	_websocket.read(buffer, ec);
+
+	// If we recieve an error code throw it.
+	if (ec) {
+		throw std::runtime_error("[WebSocketManager] - An error has occured whilst recieving websocket packet: " + ec.message());
+	}
 
 	return beast::buffers_to_string(buffer.data());
+}
+
+void WebSocketManager::asyncRecieve(std::function<void(std::string&)> callback) {
+	beast::error_code ec;
+
+	_websocket.async_read(_buffer, 
+			[this, callback](beast::error_code ec, std::size_t bytes) {
+				// If we recieve an error code throw it.
+				if (ec) {
+					throw std::runtime_error("[WebSocketManager] - An error has occured whilst recieving websocket packet in async: " + ec.message());
+				}
+				
+				// Convert the buffer to a string.
+				std::string message = beast::buffers_to_string(_buffer.data());
+
+				// Clean up the buffer.
+				_buffer.consume(_buffer.size());
+
+				// Return the message via callback.
+				callback(message);
+			}
+		);
 }
 
 void WebSocketManager::send(const std::string& json) {

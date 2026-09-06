@@ -23,6 +23,7 @@
 #include <nlohmann/json.hpp>
 #include <iostream>
 #include <string>
+#include <functional>
 
 namespace asio = boost::asio;
 namespace beast = boost::beast;
@@ -36,10 +37,12 @@ public:
 	void connect(const std::string host, const std::string port, const std::string path);
 	void send(const std::string& json);
 	std::string receive();
+	void asyncRecieve(std::function<void(std::string&)> callback);
 	void disconnect();
 private:
 	static constexpr const char* scheme = "wss://";
 	bool connected;
+	beast::flat_buffer _buffer;
 
 	asio::io_context& _ioContext;
 	asio::ssl::context _sslContext;

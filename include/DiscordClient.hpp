@@ -1,0 +1,44 @@
+/*
+	@file DiscordClient.hpp
+	@author sharafzada
+	@date 2026-09-05
+	@brief Exposes certain WebScoket functions to the luau layer.
+
+	The DiscordClient Class exposes certain WebSocket functions from GatewayClient.hpp
+	and sends them down to the luau client. The DiscordClient class does not expose 
+	everything only what the luau client needs to know i.e. when an event happened and
+	the relevant data.
+*/
+
+#ifndef DISCORD_CLIENT_HPP
+#define DISCORD_CLIENT_HPP
+
+#include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
+#include <boost/beast.hpp>
+#include <boost/beast/ssl.hpp>
+#include <boost/beast/websocket.hpp>
+
+#include <nlohmann/json.hpp>
+#include <EventDispatcher.hpp>
+#include <GatewayClient.hpp>
+#include <WebSocketManager.hpp>
+#include <iostream>
+#include <string>
+
+class DiscordClient {
+	public:
+		DiscordClient(asio::io_context& ioContext);
+
+		void connect(const std::string& token);
+		void on(const std::string* eventName, int callback);
+	private:
+		asio::io_context& context;
+		EventDispatcher _dispatcher;
+		WebSocketManager _websocket;
+		GatewayClient _gateway;
+
+	    std::string _token;
+};
+
+#endif // !DISCORD_CLIENT_HPP
