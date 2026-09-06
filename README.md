@@ -34,3 +34,4 @@ To build the repo simply open the repo in command prompt and type the following 
 ```cmd
 mkdir build && cmake -B Build
 ```
+> Note: The build is quite big ~10gb as of writing this, I didn't know builds could get so big but now I know xD
