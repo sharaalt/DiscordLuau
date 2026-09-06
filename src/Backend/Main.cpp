@@ -165,8 +165,6 @@ int main() {
 	//WebSocketManager websocket(ioContext);
 	//GatewayClient client(websocket, ioContext); // Pass onto luau for later use.
 
-	//client.connect("MTU0NTYyOTA0MjM5NTQ1MTM5NA.GebzP1.hilwsgFDcS5Fuv5_FCeBM_1XH4vzUmKofDfJaw");
-
 	ioContext.run();
 
 	return 0;
