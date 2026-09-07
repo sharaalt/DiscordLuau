@@ -1,5 +1,4 @@
 # DiscordLuau
-Discord Luau is a Discord API written in luau as well as C++
 
 ## Description:
 Discord Luau is a translation of the Discord API into luau similar to projects such as [Discordia](https://github.com/SinisterRectus/Discordia), [Discord.js](https://github.com/discordjs/discord.js), etc. Discord Luau works by handling the back-end networking i.e. Interaction with the discord API [gateway](https://docs.discord.com/developers/events/gateway) using C++ and having luau interact with the discord API via communication with the C++ layer. I did networking this way as for me it was a bit more easier for me and, I'd like to learn more C++ along the way as I already have a respectable amount of experience with lua(u) I do recognize there are better alternatives such as [ByteNet Networking](https://ffrostfall.github.io/ByteNet/) however as stated before, I do prefer C++ as the back-end. 
