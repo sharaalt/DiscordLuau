@@ -19,6 +19,10 @@ int LuauModuleLoader::load(const std::string& moduleName, const std::string& pat
 	
 	cache(resolvedPath, reference);
 
+	//std::cout << path << '\n';
+
+	//std::cout << "Yoohoo!" << '\n';
+
 	return reference;
 }
 
@@ -41,6 +45,12 @@ std::string LuauModuleLoader::loadFile(const std::filesystem::path& path) {
 }
 
 std::vector<char> LuauModuleLoader::compile(const std::string& source, const std::string& path) {
+	std::cout << "Source size: " << source.size() << '\n';
+	std::cout << "Source address: "
+		<< static_cast<const void*>(source.data()) << '\n';
+
+	std::cout << "About to compile\n";
+
 	// Extract size of the array for later use and compile into bytecode.
 	size_t bytecodeSize = 0;
 	char* bytecode = luau_compile(source.data(), source.size(), nullptr, &bytecodeSize);

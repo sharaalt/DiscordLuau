@@ -6,7 +6,26 @@ namespace {
 		lua_getfield(L, LUA_REGISTRYINDEX, "ModuleLoader");
 		auto* loader = static_cast<LuauModuleLoader*>(lua_touserdata(L, -1));
 
-		//std::cout << resolver;
+		lua_pop(L, 1);
+
+		if (!loader) {
+			luaL_error(L, "[LuaVM] - ModuleLoader not initalzed.");
+			return 0;
+		}
+
+		const char* moduleName = luaL_checkstring(L, 1);
+
+		lua_Debug ar;
+
+		if (!lua_getinfo(L, 1, "s", &ar)) {
+			return 0;
+		}
+
+		std::cout << "[LuaVM] - Require called by: " << ar.source << '\n';
+
+		std::string callerPath = ar.source;
+
+		loader->load(moduleName, ar.source);
 
 		return 0;
 	}
