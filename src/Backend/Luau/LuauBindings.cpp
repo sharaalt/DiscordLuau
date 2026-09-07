@@ -3,12 +3,15 @@
 namespace {
 	int discord_connect_func(lua_State* L) {
 		const char* token = luaL_checkstring(L, 1);
+		lua_Integer intents = luaL_checkinteger(L, 2);
 
 		lua_getfield(L, LUA_REGISTRYINDEX, "BindingContext");
 
 		auto* context = static_cast<BindingContext*>(lua_touserdata(L, -1));
 
-		context->client.connect(token);
+		context->client.connect(token, intents);
+
+		lua_pop(L, 1);
 
 		return 0;
 	}
@@ -23,7 +26,11 @@ namespace {
 		const std::string eventName = luaL_checkstring(L, 1);
 		int callbacRef = lua_ref(L, 2);
 
+		std::cout << "[LuauBindings] - Successfully binded luau event " << eventName << '\n';
+
 		context->client.on(L, eventName, callbacRef);
+
+		lua_pop(L, 1);
 
 		return 0;
 	}

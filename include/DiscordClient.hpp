@@ -37,7 +37,7 @@ class DiscordClient {
 
 		void pushJson(lua_State* L, const nlohmann::json& data);
 
-		void connect(const std::string& token);
+		void connect(const std::string& token, lua_Integer& intents);
 		void on(lua_State* L, const std::string& eventName, int callback);
 	private:
 		asio::io_context& context;
@@ -45,6 +45,7 @@ class DiscordClient {
 		WebSocketManager _websocket;
 		GatewayClient _gateway;
 
+		int _intents;
 	    std::string _token;
 };
 

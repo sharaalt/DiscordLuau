@@ -36,10 +36,10 @@ class LuauVM {
 		std::string loadFile(const std::filesystem::path& path);
 		std::vector<char> compile(const std::string& source, const std::string& path);
 
+		lua_State* _luaState;
 		LuauModuleLoader _loader;
 		LuauBindings _bindings;
 		BindingContext& _binding;
-		lua_State* _luaState;
 };
 
 #endif // LUAU_VM_HPP

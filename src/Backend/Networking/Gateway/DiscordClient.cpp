@@ -2,17 +2,25 @@
 
 DiscordClient::DiscordClient(asio::io_context& context) : context(context), _websocket(context), _gateway(_websocket, context, _dispatcher) {};
 
-void DiscordClient::connect(const std::string& token) {
+void DiscordClient::connect(const std::string& token, lua_Integer& intents) {
 	_token = token;
+	_intents = static_cast<int>(intents);
 
-	_gateway.connect(_token); // Connect to the gateway.
+	_gateway.connect(_token, _intents); // Connect to the gateway.
 }
 
 void DiscordClient::on(lua_State* L, const std::string& eventName, int callback) {
 	_dispatcher.on(eventName, [this, L, eventName, callback](nlohmann::json data) {
-		std::cout << "[DiscordClient] - Event caught calling lua callback" << '\n';
+		std::cout << "[DiscordClient] - Event caught calling lua callback.\n";
 
 		lua_getref(L, callback);
+
+		if (!lua_isfunction(L, -1)) {
+			std::cerr << "[DiscordClient] - Invaild luau callback.\n";
+
+			lua_pop(L, 1);
+			return;
+		}
 
 		pushJson(L, data);
 
@@ -20,9 +28,8 @@ void DiscordClient::on(lua_State* L, const std::string& eventName, int callback)
 			std::cerr << "[DiscordClient] - Lua callback error: " << lua_tostring(L, -1) << '\n';
 
 			lua_pop(L, 1);
+			return;
 		}
-
-		std::cout << eventName;
 
 		//lua_unref(L, callback);
 	});

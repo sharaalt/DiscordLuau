@@ -1,3 +1,6 @@
 {
     "luau-lsp.platform.type": "standard",
+    "luau-lsp.types.definitionFiles": {
+        "default": "scripts/globals.d.luau",
+    }
 }

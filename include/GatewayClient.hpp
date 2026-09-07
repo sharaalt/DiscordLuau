@@ -34,7 +34,7 @@ class GatewayClient {
 	public:
 		GatewayClient(WebSocketManager& websocket, asio::io_context& _context, EventDispatcher& dispatcher);
 
-		void connect(const std::string& token);
+		void connect(const std::string& token, int& intents);
 	private:
 		void startRecieving();
 		void handleMessage(std::string& message);
@@ -42,6 +42,10 @@ class GatewayClient {
 		void handleHello(const nlohmann::json& json);
 		void identify();
 		
+		void handleReconnect();
+		void onDisconnect();
+		void handleInvalidSession(const nlohmann::json& data);
+
 		void heartbeat();
 		void handleHeartbeatAck();
 	
@@ -53,11 +57,15 @@ class GatewayClient {
 
 		asio::steady_timer _heartbeatTimer;
 		asio::io_context& _iocontext;
+		bool _stopReceiving = false;
+		bool _heartbeatActive = true;
 		int _heartbeatInterval;
-		int _sequenceNumber;
-		std::string _token;
+		std::int64_t _sequenceNumber;
 
-		//std::string& _sessionId;
+		int _intents;
+		std::string _token;
+		std::string _sessionId;
+		std::string _resumeGatewayUrl;
 };
 
 #endif // !GATEWAY_CLIENT_HPP

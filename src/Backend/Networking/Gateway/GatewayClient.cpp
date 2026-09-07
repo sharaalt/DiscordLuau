@@ -2,11 +2,10 @@
 
 GatewayClient::GatewayClient(WebSocketManager& websocket, asio::io_context& context, EventDispatcher& dispatcher) : _websocket(websocket), _iocontext(context), _heartbeatTimer(context), _dispatcher(dispatcher) {};
 
-void GatewayClient::connect(const std::string& token) {
+void GatewayClient::connect(const std::string& token, int& intents) {
 	// Set the token and connect to the discord gateway.
 	_token = token;
-	std::cout << "[GatewayClient] Token length: "
-		<< _token.size() << '\n';
+	_intents = intents;
 
 	_websocket.connect("gateway.discord.gg", "443", "/?v=10&encoding=json");
 
@@ -17,8 +16,11 @@ void GatewayClient::connect(const std::string& token) {
 void GatewayClient::startRecieving() {
 	// Handle the message and start the next callback.
 	_websocket.asyncRecieve([this](std::string& data) {
-		handleMessage(data);
+		//if (_stopReciving) {
+		//	return;
+		//}
 
+		handleMessage(data);
 		startRecieving();
 	});
 }
@@ -45,6 +47,9 @@ void GatewayClient::handleMessage(std::string& message) {
 		case 11:
 			handleHeartbeatAck();
 			break;
+		default:
+			std::cout << "[GatewayClient] - Unhandled OP code: " << op << '\n';
+			break;
 	}
 }
 
@@ -65,7 +70,7 @@ void GatewayClient::identify() {
 		{"op", 2},
 		{"d", {
 			{"token", _token}, // Whoopsies, add something to initalize the token don't leave it here again D-:
-			{"intents", 0},
+			{"intents", _intents},
 			{"properties", {
 				{"os", "client_os"}, // Update this to include client data.
 				{"browser", "client_browser"},
@@ -80,6 +85,31 @@ void GatewayClient::identify() {
 	std::cout << "[GatewayClient] - Sucessfully conneted to the discord gateway.\n";
 }
 
+void GatewayClient::handleReconnect() {
+	std::cout << "[GatewayClient] - Discord requesting reconnect.\n";
+
+	_heartbeatActive = false;
+	_stopReceiving = true;
+	_websocket.disconnect();
+}
+
+void GatewayClient::onDisconnect() {
+	connect(_token, _intents);
+}
+
+void GatewayClient::handleInvalidSession(const nlohmann::json& data) {
+	bool resumeable = data["d"];
+
+	std::cout << "[GatewayClient] - Invalid session. Resumable: " << resumeable << '\n';
+
+	if (resumeable) {
+
+	}
+	else {
+
+	}
+}
+
 void GatewayClient::heartbeat() {
 	// Setup a heartbeat timer.
 	_heartbeatTimer.expires_after(std::chrono::milliseconds(_heartbeatInterval));
@@ -91,9 +121,13 @@ void GatewayClient::heartbeat() {
 				return;
 			}
 
+			if (!_heartbeatActive) {
+				return;
+			}
+
 			nlohmann::json payload = {
 				{"op", 1},
-				{"d", nullptr}
+				{"d", _sequenceNumber}
 			};
 
 			// Send the payload to the gateway to signify we're still alive!
@@ -111,15 +145,26 @@ void GatewayClient::handleHeartbeatAck() {
 }
 
 void GatewayClient::handleDispatch(const nlohmann::json& json) {
-	// Get the sequencenumber and the dispatch type.
-	_sequenceNumber = json["s"];
+	// Get the sequence number and make sure it exists.
+	if (!json["s"].is_null()) {
+		_sequenceNumber = json["s"];
+	}
 
 	std::string type = json["t"];
 	auto data = json["d"];
+
+	if (type == "READY") {
+		handleReady(json);
+	}
+
+	std::cout << "[GatewayClient] - Event dispatched: " << type << '\n';
 
 	_dispatcher.emit(type, data);
 }
 
 void GatewayClient::handleReady(const nlohmann::json& json) {
-	
+	_sessionId = json["d"]["session_id"];
+	_resumeGatewayUrl = json["d"]["resume_gateway_url"];
+
+	std::cout << "[GatewayClient] - Session ready.\n";
 }
