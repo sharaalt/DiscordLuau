@@ -8,6 +8,54 @@ void DiscordClient::connect(const std::string& token) {
 	_gateway.connect(_token); // Connect to the gateway.
 }
 
-void DiscordClient::on(const std::string* eventName, int callback) {
+void DiscordClient::on(lua_State* L, const std::string& eventName, int callback) {
+	_dispatcher.on(eventName, [this, L, eventName, callback](nlohmann::json data) {
+		std::cout << "[DiscordClient] - Event caught calling lua callback" << '\n';
 
+		lua_getref(L, callback);
+
+		pushJson(L, data);
+
+		if (lua_pcall(L, 1, 0, 0) != 0) {
+			std::cerr << "[DiscordClient] - Lua callback error: " << lua_tostring(L, -1) << '\n';
+
+			lua_pop(L, 1);
+		}
+
+		std::cout << eventName;
+
+		//lua_unref(L, callback);
+	});
+}
+
+void DiscordClient::pushJson(lua_State* L, const nlohmann::json& data) {
+	if (data.is_object()) {
+		lua_newtable(L);
+
+		for (auto& [key, child] : data.items()) {
+			pushJson(L, child);
+			lua_setfield(L, -2, key.c_str());
+		}
+	}
+	else if (data.is_array()) {
+		lua_newtable(L);
+
+		int index = 1;
+		for (const auto& child : data) {
+			pushJson(L, child);
+			lua_rawseti(L, -2, index++);
+		}
+	}
+	else if (data.is_string()) {
+		lua_pushstring(L, data.get<std::string>().c_str());
+	}
+	else if (data.is_boolean()) {
+		lua_pushboolean(L, data.get<bool>());
+	}
+	else if (data.is_number()) {
+		lua_pushnumber(L, data.get<double>());
+	}
+	else if (data.is_null()) {
+		lua_pushnil(L);
+	}
 }

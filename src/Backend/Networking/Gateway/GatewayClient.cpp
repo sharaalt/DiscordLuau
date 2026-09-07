@@ -5,11 +5,10 @@ GatewayClient::GatewayClient(WebSocketManager& websocket, asio::io_context& cont
 void GatewayClient::connect(const std::string& token) {
 	// Set the token and connect to the discord gateway.
 	_token = token;
-	_websocket.connect("gateway.discord.gg", "443", "/?v=10&encoding=json");
+	std::cout << "[GatewayClient] Token length: "
+		<< _token.size() << '\n';
 
-	// Recieve the response message and handle it.
-	std::string message = _websocket.receive();
-	handleMessage(message);
+	_websocket.connect("gateway.discord.gg", "443", "/?v=10&encoding=json");
 
 	// Begin recieving in async to prevent blocking the thread.
 	startRecieving();
@@ -77,12 +76,6 @@ void GatewayClient::identify() {
 
 	// Dump our payload and send it as a response to the discord gateway.
 	_websocket.send(payload.dump());
-	try {
-		std::string message = _websocket.receive();
-	}
-	catch (const std::runtime_error& e) {
-		std::cerr << e.what() << '\n';
-	}
 
 	std::cout << "[GatewayClient] - Sucessfully conneted to the discord gateway.\n";
 }

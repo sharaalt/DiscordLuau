@@ -35,6 +35,16 @@ void WebSocketManager::asyncRecieve(std::function<void(std::string&)> callback) 
 
 	_websocket.async_read(_buffer, 
 			[this, callback](beast::error_code ec, std::size_t bytes) {
+				if (ec == beast::websocket::error::closed) {
+					std::cout << "[WebSocketManager]  - Websocket closed by peer.\n";
+
+					auto closeCode = _websocket.reason().code;
+					auto closeReason = _websocket.reason().reason;
+				
+					std::cout << closeCode << '\n';
+					std::cout << closeReason << '\n';
+				}
+
 				// If we recieve an error code throw it.
 				if (ec) {
 					throw std::runtime_error("[WebSocketManager] - An error has occured whilst recieving websocket packet in async: " + ec.message());

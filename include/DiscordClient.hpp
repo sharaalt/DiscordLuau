@@ -13,16 +13,21 @@
 #ifndef DISCORD_CLIENT_HPP
 #define DISCORD_CLIENT_HPP
 
+#include <luacode.h>
+#include <lua.h>
+#include <lualib.h>
+
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/beast.hpp>
 #include <boost/beast/ssl.hpp>
 #include <boost/beast/websocket.hpp>
-
 #include <nlohmann/json.hpp>
+
 #include <EventDispatcher.hpp>
 #include <GatewayClient.hpp>
 #include <WebSocketManager.hpp>
+
 #include <iostream>
 #include <string>
 
@@ -30,8 +35,10 @@ class DiscordClient {
 	public:
 		DiscordClient(asio::io_context& ioContext);
 
+		void pushJson(lua_State* L, const nlohmann::json& data);
+
 		void connect(const std::string& token);
-		void on(const std::string* eventName, int callback);
+		void on(lua_State* L, const std::string& eventName, int callback);
 	private:
 		asio::io_context& context;
 		EventDispatcher _dispatcher;
