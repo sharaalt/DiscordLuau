@@ -24,9 +24,10 @@
 #include <boost/beast/websocket.hpp>
 #include <nlohmann/json.hpp>
 
+#include <RestClient.hpp>
 #include <EventDispatcher.hpp>
 #include <GatewayClient.hpp>
-#include <WebSocketManager.hpp>
+#include <NetworkManager.hpp>
 
 #include <iostream>
 #include <string>
@@ -42,8 +43,9 @@ class DiscordClient {
 	private:
 		asio::io_context& context;
 		EventDispatcher _dispatcher;
-		WebSocketManager _websocket;
+		NetworkManager _websocket;
 		GatewayClient _gateway;
+		RestClient _rest;
 
 		int _intents;
 	    std::string _token;

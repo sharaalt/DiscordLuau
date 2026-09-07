@@ -1,6 +1,6 @@
 #include <GatewayClient.hpp>
 
-GatewayClient::GatewayClient(WebSocketManager& websocket, asio::io_context& context, EventDispatcher& dispatcher) : _websocket(websocket), _iocontext(context), _heartbeatTimer(context), _dispatcher(dispatcher) {};
+GatewayClient::GatewayClient(NetworkManager& websocket, asio::io_context& context, EventDispatcher& dispatcher) : _websocket(websocket), _iocontext(context), _heartbeatTimer(context), _dispatcher(dispatcher) {};
 
 void GatewayClient::connect(const std::string& token, int& intents) {
 	// Set the token and connect to the discord gateway.

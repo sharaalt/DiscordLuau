@@ -14,11 +14,13 @@
 #define LUAU_MODULE_LOADER_HPP
 
 #include <LuauModuleResolver.hpp>
+#include "DiscordClient.hpp"
 
 #include <luacode.h>
 #include <lua.h>
 #include <lualib.h>
 
+#include <unordered_map>
 #include <iterator>
 #include <vector>
 #include <filesystem>

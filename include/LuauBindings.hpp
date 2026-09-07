@@ -13,6 +13,7 @@
 #define LUAU_BINDINGS_HPP
 
 #include "Types.hpp"
+#include "DiscordClient.hpp"
 
 #include <luacode.h>
 #include <lua.h>

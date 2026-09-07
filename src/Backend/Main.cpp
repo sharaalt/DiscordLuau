@@ -14,7 +14,7 @@
 #include <LuauVM.hpp>
 #include <Types.hpp>
 #include <DiscordClient.hpp>
-#include <WebSocketManager.hpp>
+#include <NetworkManager.hpp>
 #include <GatewayClient.hpp>
 
 #include <iostream>

@@ -4,8 +4,8 @@
 	@date 2026-09-04
 	@brief Handles the Discord Gateway communcation.
 
-	The GatewayClient is a higher level abstraction of the WebSocketManager.
-	It handles Discord API gateway protocols whilst WebSocketManager 
+	The GatewayClient is a higher level abstraction of the NetworkManager.
+	It handles Discord API gateway protocols whilst NetworkManager 
 	handles the actual WebSocket connection and message transmission.
 */
 
@@ -20,7 +20,7 @@
 
 #include <EventDispatcher.hpp>
 #include <nlohmann/json.hpp>
-#include <WebSocketManager.hpp>
+#include <NetworkManager.hpp>
 #include <iostream>
 #include <string>
 #include <functional>
@@ -32,7 +32,7 @@ using tcp = asio::ip::tcp;
 
 class GatewayClient {
 	public:
-		GatewayClient(WebSocketManager& websocket, asio::io_context& _context, EventDispatcher& dispatcher);
+		GatewayClient(NetworkManager& websocket, asio::io_context& _context, EventDispatcher& dispatcher);
 
 		void connect(const std::string& token, int& intents);
 	private:
@@ -52,7 +52,7 @@ class GatewayClient {
 		void handleDispatch(const nlohmann::json& json);
 		void handleReady(const nlohmann::json& json);
 
-		WebSocketManager& _websocket;
+		NetworkManager& _websocket;
 		EventDispatcher& _dispatcher;
 
 		asio::steady_timer _heartbeatTimer;

@@ -1,6 +1,6 @@
 #include <DiscordClient.hpp>
 
-DiscordClient::DiscordClient(asio::io_context& context) : context(context), _websocket(context), _gateway(_websocket, context, _dispatcher) {};
+DiscordClient::DiscordClient(asio::io_context& context) : context(context), _websocket(context), _gateway(_websocket, context, _dispatcher), _rest(_token, _websocket) {};
 
 void DiscordClient::connect(const std::string& token, lua_Integer& intents) {
 	_token = token;
@@ -11,6 +11,8 @@ void DiscordClient::connect(const std::string& token, lua_Integer& intents) {
 
 void DiscordClient::on(lua_State* L, const std::string& eventName, int callback) {
 	_dispatcher.on(eventName, [this, L, eventName, callback](nlohmann::json data) {
+		_rest.messages();
+
 		std::cout << "[DiscordClient] - Event caught calling lua callback.\n";
 
 		lua_getref(L, callback);

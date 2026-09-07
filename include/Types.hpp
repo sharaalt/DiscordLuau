@@ -11,7 +11,17 @@
 #ifndef TYPES_HPP
 #define TYPES_HPP
 
-#include "DiscordClient.hpp"
+#include <map>
+#include <string>
+#include <iostream>
+
+class DiscordClient;
+
+struct HTTPResponse {
+	int statusCode;
+	std::map<std::string, std::string> headers;
+	std::string body;
+};
 
 struct BindingContext {
 	DiscordClient& client;
