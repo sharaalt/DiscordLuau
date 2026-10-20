@@ -1,0 +1,7 @@
+{
+  "dependencies": [
+    "openssl",
+    "boost-beast",
+    "nlohmann-json"
+  ]
+}
