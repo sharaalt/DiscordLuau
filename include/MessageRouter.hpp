@@ -10,8 +10,8 @@
 	callback.
 */
 
+#ifndef MESSAGE_ROUTER_HPP
 #define MESSAGE_ROUTER_HPP
-#ifdef MESSAGE_ROUTER_HPP
 
 #include <iostream>
 #include <vector>
@@ -29,7 +29,7 @@ class MessageRouter {
 
 		void handleCode(const int& opCode, const nlohmann::json& data);
 
-		void addHandler(const int& opCode, Handler& handler);
+		void addHandler(const int& opCode, Handler handler);
 		void removeHandler(const int& opCode);
 	private:
 		std::unordered_map<int, Handler> handlers;

@@ -1,8 +1,8 @@
 #include <iostream>
+#include <thread>
 
-#include "NetworkManager.hpp"
-#include "EventDispatcher.hpp"
-#include "MessageRouter.hpp"
+#include "Secrets.hpp"
+#include "DiscordClient.hpp"
 
 int main() {
 	//std::function<void(int)> func = [](int argC) {
@@ -15,9 +15,16 @@ int main() {
 
 	//MessageRouter router;
 	//EventDispatcher eventDisp;
-	NetworkManager manager(context);
+	DiscordClient manager(context);
 
-	manager.connect("gateway.discord.gg", "443", "/?v=10&encoding=json");
+	auto workGuard = asio::make_work_guard(context);
+
+	std::thread networkThread([&context]() {
+		context.run();
+	});
+
+
+	manager.connect(token);
 
 	//const nlohmann::json data = {
 	//	{ "op", 2 },
@@ -42,6 +49,9 @@ int main() {
 	//EventDispatcher eventDisp;
 	//eventDisp.on(eventName, func);
 	//eventDisp.emit(eventName);
+	
+	workGuard.reset();
+	networkThread.join();
 
 	return 0;
 }

@@ -15,9 +15,9 @@ void MessageRouter::handleCode(const int& opCode, const nlohmann::json& data) {
 	handler->second(data);
 }
 
-void MessageRouter::addHandler(const int& opCode, Handler& handler) {
+void MessageRouter::addHandler(const int& opCode, Handler handler) {
 	// Create a new OP code register and add the handler.
-	auto result = handlers.try_emplace(opCode, handler);
+	auto result = handlers.try_emplace(opCode, std::move(handler));
 
 	// If second is true we successfully registered the OP code.
 	if (result.second) {

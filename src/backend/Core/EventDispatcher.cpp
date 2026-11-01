@@ -1,6 +1,6 @@
 #include "EventDispatcher.hpp"
 
-int EventDispatcher::on(const std::string& eventName, std::function<void(int)> callback) {
+int EventDispatcher::on(const std::string& eventName, std::function<void(const nlohmann::json&)> callback) {
 	// Create's a new event if it already doesn't exist.
 	auto& index = callbackCache[eventName];
 	callbackId += 1;
@@ -14,7 +14,7 @@ int EventDispatcher::on(const std::string& eventName, std::function<void(int)> c
 	return callbackId;
 };
 
-void EventDispatcher::emit(const std::string& eventName) {
+void EventDispatcher::emit(const std::string& eventName, const nlohmann::json& data) {
 	// Find the callbacks in the cache.
 	auto cacheCallbacks = callbackCache.find(eventName);
 
@@ -29,7 +29,7 @@ void EventDispatcher::emit(const std::string& eventName) {
 
 	// Call all the callbacks.
 	for (auto& callbackStruct : callbacks) {
-		callbackStruct.callback(10);
+		callbackStruct.callback(data);
 	};
 
 	// Print success.
