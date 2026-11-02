@@ -19,16 +19,14 @@
 #include <luau/lua.h>
 #include <luau/luacode.h>
 
+#include <Types.hpp>
 #include <luau/LuauCompiler.hpp>
 #include <luau/LuauRuntime.hpp>
-
-void deleteConnection(lua_State* state) {
-	lua_close(state);
-}
+#include <luau/BindingManager.hpp>
 
 class BackendManager {
 	public:
-		BackendManager() = default;
+		BackendManager(std::shared_ptr<LuauContext> _context);
 		
 		// Lifecycle Functions
 		void initialize();
@@ -39,13 +37,15 @@ class BackendManager {
 		bool isConnected() const;
 	private:
 		// Classes
+		std::unique_ptr<BindingManager> bindings;
 		LuauCompiler compiler;
 		std::unique_ptr<LuauRuntime> runtime;
 
 		// Variables
-		bool vmActive;
-		bool connected;
-		std::unique_ptr<lua_State, decltype(&deleteConnection)> state;
+		bool vmActive{};
+		bool connected{};
+		std::shared_ptr<LuauContext> context;
+		std::unique_ptr<lua_State, LuauStateDeleter> state = nullptr;
 };
 
 #endif // !BACKEND_MANAGER_HPP

@@ -1,5 +1,7 @@
 #include <luau/BackendManager.hpp>
 
+BackendManager::BackendManager(std::shared_ptr<LuauContext> _context) : context(_context) {}
+
 void BackendManager::initialize() {
 	// If the VM is active return.
 	if (vmActive) {
@@ -20,7 +22,12 @@ void BackendManager::initialize() {
 	state.reset(rawState);
 	luaL_openlibs(state.get());
 
+	// Set up the bindings class also.
+	bindings = std::make_unique<BindingManager>(*state.get(), std::weak_ptr<LuauContext>(context));
 	runtime = std::make_unique<LuauRuntime>(*rawState);
+
+	// Register the bindings.
+	bindings->registerBindings();
 
 	// Update the VM active to true and print success.
 	vmActive = true;
