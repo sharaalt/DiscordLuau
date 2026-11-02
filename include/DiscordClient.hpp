@@ -7,6 +7,8 @@
 	The DiscordClient ties all the network classes together i.e. MessageRouter,
 	NetworkManager, etc and uses a unified class to manage all of them. This 
 	acts as the final connection before exposing to the API to the luau side.
+	
+	@note Could use refactoring/decoupling it's a bit beefy for my liking.
 */
 
 #ifndef DISCORD_CLIENT_HPP
@@ -29,6 +31,11 @@ class DiscordClient {
 		void initalize();
 		void identify();
 		void startHeartbeat();
+		void scheduleAckTimer();
+		void scheduleHeartbeat();
+		void sendHeartbeat();
+		void handleDisconnect();
+		void reconnect();
 
 		// Gateway Data
 		const std::string host = "gateway.discord.gg";
@@ -37,12 +44,17 @@ class DiscordClient {
 		
 		// Variables
 		asio::io_context& _context;
+		asio::strand<asio::io_context::executor_type> _strand;
 		asio::steady_timer _timer;
+		asio::steady_timer _ackTimer;
 		std::string _token;
+
 		int _heartbeatInterval;
 		int _sequenceNumber = NULL;
-		bool heartbeatActive = false;
 		bool identified = false;
+		bool reconnecting = false;
+
+		HeartbeatType heartbeatType;
 
 		// Dependencies
 		std::shared_ptr<EventDispatcher> _dispatcher = std::make_shared<EventDispatcher>();

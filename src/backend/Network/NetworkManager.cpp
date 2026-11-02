@@ -60,9 +60,12 @@ void NetworkManager::connect(const std::string& host, const std::string& port, c
 	_port = port;
 	_path = path;
 
+	// Get results and begin connection process.
 	auto results = resolve(host, port);
-
 	tcpConnection(results);
+
+	// Emit a empty network event once connected.
+	_dispatcher->emit("NetworkConnect", {});
 }
 
 
@@ -125,7 +128,11 @@ void NetworkManager::close() {
 	_websocket.async_close(
 		websocket::close_code::normal,
 		[this](boost::system::error_code ec) {
+			// If an error occurs prevent the network close event from firing.
 			NetworkErrors::handleClose(ec, isClosing, isConnected);
+			if (ec) return;
+
+			_dispatcher->emit("NetworkClose", {});
 		}	
 	);
 }

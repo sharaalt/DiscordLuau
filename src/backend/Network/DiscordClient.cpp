@@ -9,7 +9,7 @@ namespace ErrorHandlers {
 	}
 }
 
-DiscordClient::DiscordClient(asio::io_context& context) : _context(context), _timer(_context), _networkManager(context, _dispatcher) {
+DiscordClient::DiscordClient(asio::io_context& context) : _context(context), _strand(asio::make_strand(_context)), _timer(_context), _ackTimer(context), _networkManager(context, _dispatcher) {
 	this->initalize();
 }
 
@@ -20,13 +20,12 @@ void DiscordClient::connect(const std::string& token) {
 	// Move the token out of scope and into the client.
 	_token = std::move(token);
 
+	_dispatcher->once("NetworkConnect", [](const nlohmann::json&) {
+		std::cout << "[DiscordClient] - Successfully connected bot to websocket." << '\n';
+	});
+
 	// Initalze the websocket.
 	_networkManager.connect(host, port, path);
-
-	//// Write the data to the websocket.
-	//_networkManager.asyncWrite(data);
-
-	std::cout << "[DiscordClient] - Successfully connected bot to websocket." << '\n';
 }
 
 void DiscordClient::disconnect() {
@@ -62,6 +61,10 @@ void DiscordClient::initalize() {
 		};
 	});
 
+	_messageRouter.addHandler(1, [this](const nlohmann::json& data) {
+		std::cout << data << '\n';
+	});
+
 	_messageRouter.addHandler(10, [this](const nlohmann::json& data) {
 		// Retrieve the heartbeat interval and update the member.
 		int heartbeatInterval = data["d"]["heartbeat_interval"];
@@ -69,12 +72,12 @@ void DiscordClient::initalize() {
 
 		this->startHeartbeat();
 		this->identify();
-
-		//_networkManager.asyncWrite(botData);
 	});
 
 	_messageRouter.addHandler(11, [this](const nlohmann::json& data) {
-		std::cout << data << '\n';
+		// Cancel the ack timer and confirm processing has been completed.
+		heartbeatType.HeartbeatProcessing = false;
+		_ackTimer.cancel();
 	});
 }
 
@@ -92,9 +95,9 @@ void DiscordClient::identify() {
 			{ "token", _token },
 			{ "intents", 0 },
 			{ "properties",{
-				{ "os", "NULL" },
-				{ "browser", "NULL" },
-				{ "device", "NULL" },
+				{ "$os", "NULL" },
+				{ "$browser", "NULL" },
+				{ "$device", "NULL" },
 			}},
 		}}
 	};
@@ -105,31 +108,124 @@ void DiscordClient::identify() {
 
 void DiscordClient::startHeartbeat() {
 	// If the heartbeat is active no need to begin a new one.
-	if (heartbeatActive) {
+	if (heartbeatType.HeartbeatActive) {
 		std::cout << "[DiscordClient] - Heartbeat already active." << '\n';
 		return;
 	}
 
-	// Set the heartbeat active to true and begin the heartbeat.
-	heartbeatActive = true;
+	// Set the heartbeat active to true and schedule the heartbeat.
+	heartbeatType.HeartbeatActive = true;
+	this->scheduleHeartbeat();
+}
+
+void DiscordClient::scheduleAckTimer() {
+	_ackTimer.expires_after(std::chrono::milliseconds(_heartbeatInterval));
+	_ackTimer.async_wait(asio::bind_executor(
+		_strand,
+		[this](const boost::system::error_code ec) {
+			if (ec == asio::error::operation_aborted) return;
+
+			if (ec) {
+				std::cout << "[DiscordClient] - An error has occured: " << ec.message() << '\n';
+				return;
+			}
+
+			if (heartbeatType.HeartbeatProcessing) {
+				std::cout << "[DiscordClient] - OP Code 11 has not been recieved within the allotted time." << '\n';
+				this->handleDisconnect();
+				return;
+			}
+		}
+	));
+}
+
+void DiscordClient::scheduleHeartbeat() {
+	if (heartbeatType.HeartbeatScheduled) {
+		std::cout << "[DiscordClient] - A heartbeat is already scheduled." << '\n';
+		return;
+	}
+
+	heartbeatType.HeartbeatScheduled = true;
+	std::cout << "[DiscordClient] - Heartbeat event scheduled." << '\n';
+
+	// Setup timer.
 	_timer.expires_after(std::chrono::milliseconds(_heartbeatInterval));
+	_timer.async_wait(asio::bind_executor(
+		_strand, 
+		[this](const boost::system::error_code ec) {
+			// Update error handling.
+			if (ec == asio::error::operation_aborted) return;
 
-	_timer.async_wait([this](const boost::system::error_code ec) {
-		if (ec) {
-			heartbeatActive = false;
-			ErrorHandlers::heartbeatError(ec);
-			return;
+			if (ec) {
+				std::cerr << "[DiscordClient] - An error occured while waiting for timer: " << ec.message() << '\n';
+
+				heartbeatType.HeartbeatScheduled = false;
+				ErrorHandlers::heartbeatError(ec);
+				return;
+			}
+
+			// Send the heartbeat data.
+			this->sendHeartbeat();
 		}
-		else if (!ec) {
-			this->startHeartbeat();
-		}
+	));
 
-		// Create new heartbeat data and write it to the gateway.
-		nlohmann::json heartbeatData = {
-			{ "op", 1 },
-			{ "d", _sequenceNumber },
-		};
+}
 
-		_networkManager.asyncWrite(heartbeatData);
+void DiscordClient::sendHeartbeat() {
+	// Create new heartbeat data and write it to the gateway.
+	nlohmann::json heartbeatData = {
+		{ "op", 1 },
+		{ "d", _sequenceNumber },
+	};
+
+	_networkManager.asyncWrite(heartbeatData);
+
+	// Update state variables.
+	heartbeatType.HeartbeatProcessing = true;
+	heartbeatType.HeartbeatScheduled = false;
+
+	// Indicate the heartbeat has been sent.
+	std::cout << "[DiscordClient] - Heratbeat sent." << '\n';
+
+	// Schedule the next heartbeat and the ack timer.
+	this->scheduleAckTimer();
+	this->scheduleHeartbeat();
+}
+
+void DiscordClient::handleDisconnect() {
+	if (reconnecting) {
+		std::cout << "[DiscordClient] - Already reconnecting." << '\n';
+		return;
+	}
+
+	// Change the heartbeat states.
+	heartbeatType.HeartbeatProcessing = false;
+	heartbeatType.HeartbeatScheduled = false;
+	heartbeatType.HeartbeatActive = false;
+
+	// Dump the active timer and print a reconnection message.
+	_timer.cancel();
+	_ackTimer.cancel();
+	std::cout << "[DiscordClient] - Attempting to reconnect with websocket." << '\n';
+
+	// Close the websocket connection & call reconnect.
+	_networkManager.close();
+	this->reconnect();
+}
+
+void DiscordClient::reconnect() {
+	// If reconnecting is true return, we're already reconnecting.
+	if (reconnecting) {
+		std::cout << "[DiscordClient] - Already reconnecting." << '\n';
+		return;
+	}
+
+	// Connect a dispatcher to network connect.
+	_dispatcher->once("NetworkConnect", [this](const nlohmann::json&) {
+		this->reconnecting = false;
 	});
+
+	// Reconnect to the websocket and set reconnecting to true.
+	reconnecting = true;
+	_networkManager.connect(host, port, path);
 }
