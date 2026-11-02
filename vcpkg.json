@@ -1,7 +1,8 @@
 {
   "dependencies": [
-    "openssl",
     "boost-beast",
-    "nlohmann-json"
+    "nlohmann-json",
+    "openssl",
+    "luau"
   ]
 }

@@ -15,6 +15,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Vcpkg dependencies
+find_package(unofficial-luau CONFIG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(nlohmann_json REQUIRED)
 find_package(OpenSSL REQUIRED)
@@ -35,10 +36,13 @@ target_include_directories(DiscordLuau
 )
 
 # Link vcpkg libraries
-target_link_libraries(DiscordLuau
-	PRIVATE
-        Boost::system
-        OpenSSL::SSL
-        OpenSSL::Crypto
-        nlohmann_json::nlohmann_json
+target_link_libraries(DiscordLuau PRIVATE
+    Boost::system
+    OpenSSL::SSL
+    OpenSSL::Crypto
+    nlohmann_json::nlohmann_json
+    unofficial::luau::Luau.VM
+    unofficial::luau::Luau.Compiler
+    unofficial::luau::Luau.Ast
+    unofficial::luau::Luau.Require
 )
