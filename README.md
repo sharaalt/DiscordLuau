@@ -1,7 +1,7 @@
 # DiscordLuau
 
 ## Description:
-Discord Luau is a translation of the Discord API into luau similar to projects such as [Discordia](https://github.com/SinisterRectus/Discordia), [Discord.js](https://github.com/discordjs/discord.js), etc. Discord Luau works by handling the back-end networking i.e. Interaction with the discord API [gateway](https://docs.discord.com/developers/events/gateway) using C++ and having luau interact with the discord API via communication with the C++ layer. I did networking this way as for me it was a bit more easier for me and, I'd like to learn more C++ along the way as I already have a respectable amount of experience with lua(u) I do recognize there are better alternatives such as [ByteNet Networking](https://ffrostfall.github.io/ByteNet/) however as stated before, I do prefer C++ as the back-end. 
+Discord Luau is a translation of the Discord API into luau similar to projects such as [Discordia](https://github.com/SinisterRectus/Discordia), [Discord.js](https://github.com/discordjs/discord.js), etc. Discord Luau works by handling the back-end networking i.e. Interaction with the discord API [gateway](https://docs.discord.com/developers/events/gateway) using C++ and having luau interact with the discord API via communication with the C++ layer. I did networking this way as for me it was a bit more easier for me and, I'd like to learn more C++ along the way as I already have a respectable amount of experience with lua(u) I do recognize there are better alternatives such as [ByteNet Networking](https://ffrostfall.github.io/ByteNet/) however as stated before, I do prefer C++ as the back-end since, I'd like to learn it more of course! 
 
 ## Dependencies:
 - **[luau:](https://github.com/luau-lang/luau)** (it's kind of in the name): v.0.722
@@ -13,13 +13,15 @@ Discord Luau is a translation of the Discord API into luau similar to projects s
 ### Back-end:
 #### Networking:
 - [x] Gateway Communication
-- [ ] Expose networking functions to luau side
+- [ ] Expose networking functions to luau
 - [x] EventDispatcher for C++
    -  [ ] EventDispatcher integration for luau
 
 ### Front-end:
-- [x] Basic bot connection
+- [ ] Binding C++ functions to luau (working on it)
+- [ ] Basic bot connection from luau
 
+> Note: This isn't really a exact to-do list to be honest, but it's kind of the general scope of what, I'm doing.
 ## Contributions:
 Feel free to contribute as much as you want however if you are making major changes please let me know and, I'll take a look at them before committing!
  
