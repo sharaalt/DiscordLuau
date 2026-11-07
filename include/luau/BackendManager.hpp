@@ -14,6 +14,8 @@
 
 #include <iostream>
 #include <memory>
+#include <fstream>
+#include <filesystem>
 
 #include <luau/lualib.h>
 #include <luau/lua.h>
@@ -23,6 +25,7 @@
 #include <luau/LuauCompiler.hpp>
 #include <luau/LuauRuntime.hpp>
 #include <luau/BindingManager.hpp>
+#include <luau/ModuleManager.hpp>
 
 class BackendManager {
 	public:
@@ -36,10 +39,14 @@ class BackendManager {
 		bool isInitialized() const;
 		bool isConnected() const;
 	private:
+		// Functions
+		void executeMain();
+
 		// Classes
 		std::unique_ptr<BindingManager> bindings;
-		LuauCompiler compiler;
-		std::unique_ptr<LuauRuntime> runtime;
+		std::shared_ptr<LuauCompiler> compiler;
+		std::unique_ptr<ModuleManager> manager;
+		std::shared_ptr<LuauRuntime> runtime;
 
 		// Variables
 		bool vmActive{};

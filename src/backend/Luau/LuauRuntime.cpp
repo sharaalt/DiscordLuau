@@ -2,11 +2,11 @@
 
 LuauRuntime::LuauRuntime(lua_State& state) : _state(state) {}
 
-void LuauRuntime::executeBytecode(std::vector<char> bytecode, const char* chunkName) {
+bool LuauRuntime::executeBytecode(std::vector<char> bytecode, const char* chunkName) {
 	// If the vector is empty there's no point in executing empty bytecode.
 	if (bytecode.empty()) {
 		std::cout << "[LuauRuntime] - Cannot execute empty bytecode.";
-		return;
+		return false;
 	}
 
 	// If the loaded bytecode is not LUA_OK that means an error has occured.
@@ -16,8 +16,8 @@ void LuauRuntime::executeBytecode(std::vector<char> bytecode, const char* chunkN
 
 		// If the error is a nullptr theres nothing to print.
 		if (errorMessage == nullptr) {
-			std::cerr << "[LuauRuntime] - An error occured, however no error message was extracted." << '\n';
-			return;
+			std::cerr << "[LuauRuntime] - An error occured, however no error message was extracted.\n";
+			return false;
 		}
 
 		// Return and throw the error message.
@@ -26,7 +26,7 @@ void LuauRuntime::executeBytecode(std::vector<char> bytecode, const char* chunkN
 
 		lua_pop(&_state, 1);
 
-		return;
+		return false;
 	};
 
 	// If the pcall function doesn't return LUA_OK an error has occured.
@@ -37,8 +37,8 @@ void LuauRuntime::executeBytecode(std::vector<char> bytecode, const char* chunkN
 
 		// If the error is a nullptr theres nothing to print.
 		if (errorMessage == nullptr) {
-			std::cerr << "[LuauRuntime] - An error occured, however no error message was extracted." << '\n';
-			return;
+			std::cerr << "[LuauRuntime] - An error occured, however no error message was extracted.\n";
+			return false;
 		}
 
 		// Return and throw the error message.
@@ -47,6 +47,8 @@ void LuauRuntime::executeBytecode(std::vector<char> bytecode, const char* chunkN
 
 		lua_pop(&_state, 1);
 
-		return;
+		return false;
 	}
+
+	return true;
 }

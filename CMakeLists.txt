@@ -26,6 +26,13 @@ file(GLOB_RECURSE DISCORD_SOURCE CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp"
 )
 
+# Script files
+file(REMOVE_RECURSE "${CMAKE_BINARY_DIR}/scripts")
+
+file(COPY "${CMAKE_SOURCE_DIR}/scripts"
+    DESTINATION ${CMAKE_BINARY_DIR}
+)
+
 add_executable(DiscordLuau
 	${DISCORD_SOURCE}
 )

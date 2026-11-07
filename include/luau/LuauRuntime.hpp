@@ -25,7 +25,7 @@ class LuauRuntime {
 	public:
 		LuauRuntime(lua_State& state);
 
-		void executeBytecode(std::vector<char> bytecode, const char* chunkName);
+		bool executeBytecode(std::vector<char> bytecode, const char* chunkName);
 	private:
 		lua_State& _state;
 };
